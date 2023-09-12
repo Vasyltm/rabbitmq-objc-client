@@ -48,7 +48,7 @@
 @property (nonatomic, readwrite) NSString *name;
 @property (nonatomic, readwrite) NSString *type;
 @property (nonatomic, readwrite) RMQExchangeDeclareOptions options;
-@property (nonatomic, readwrite) id<RMQChannel> channel;
+@property (nonatomic, weak, readwrite) id<RMQChannel> channel;
 @end
 
 @implementation RMQExchange

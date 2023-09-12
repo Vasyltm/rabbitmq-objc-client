@@ -44,7 +44,7 @@
 
 @interface RMQConfirmationTransaction ()
 @property (nonatomic, readwrite) RMQConfirmationCallback callback;
-@property (nonatomic, readwrite) id<RMQLocalSerialQueue> delayQueue;
+@property (nonatomic, weak, readwrite) id<RMQLocalSerialQueue> delayQueue;
 @property (nonatomic, readwrite) BOOL isComplete;
 @end
 

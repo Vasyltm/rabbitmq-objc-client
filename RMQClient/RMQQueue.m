@@ -50,7 +50,7 @@
 @property (nonatomic, copy, readwrite) NSString *name;
 @property (nonatomic, readwrite) RMQQueueDeclareOptions options;
 @property (nonatomic, readwrite) RMQTable *arguments;
-@property (nonatomic, readwrite) id <RMQChannel> channel;
+@property (nonatomic, weak, readwrite) id <RMQChannel> channel;
 @end
 
 @implementation RMQQueue

@@ -45,7 +45,7 @@
 #import "RMQDispatcher.h"
 
 @interface RMQSuspendResumeDispatcher ()
-@property (nonatomic, readwrite) id<RMQChannel> channel;
+@property (nonatomic,weak, readwrite) id<RMQChannel> channel;
 @property (nonatomic,weak, readwrite) id<RMQSender> sender;
 @property (nonatomic, readwrite) RMQFramesetValidator *validator;
 @property (nonatomic, readwrite) id<RMQLocalSerialQueue> commandQueue;
@@ -106,23 +106,27 @@
 - (void)sendSyncMethod:(id<RMQMethod>)method
      completionHandler:(void (^)(RMQFrameset *frameset))completionHandler {
 
+    __weak id this = self;
+
     [self.commandQueue enqueue:^{
-        [self processOutgoing:method executeOrErr:^{
-            if ([self isChannelClose:method]) {
-                [self processUserInitiatedChannelClose];
+        __strong typeof(self) strongThis = this;
+        [strongThis processOutgoing:method executeOrErr:^{
+            if ([strongThis isChannelClose:method]) {
+                [strongThis processUserInitiatedChannelClose];
             }
 
-            RMQFrameset *outgoingFrameset = [[RMQFrameset alloc] initWithChannelNumber:self.channelNumber method:method];
-            [self.commandQueue suspend];
-            [self.sender sendFrameset:outgoingFrameset];
+            RMQFrameset *outgoingFrameset = [[RMQFrameset alloc] initWithChannelNumber:strongThis.channelNumber method:method];
+            [strongThis.commandQueue suspend];
+            [strongThis.sender sendFrameset:outgoingFrameset];
         }];
     }];
 
     [self.commandQueue enqueue:^{
-        RMQFramesetValidationResult *result = [self.validator expect:method.syncResponse];
-        if (self.isOpen && result.error) {
-            [self.delegate channel:self.channel error:result.error];
-        } else if (self.isOpen || [self isChannelClose:method]) {
+        __strong typeof(self) strongThis = this;
+        RMQFramesetValidationResult *result = [strongThis.validator expect:method.syncResponse];
+        if (strongThis.isOpen && result.error) {
+            [strongThis.delegate channel:strongThis.channel error:result.error];
+        } else if (strongThis.isOpen || [strongThis isChannelClose:method]) {
             // execute completion handlers when open
             // but special case user-initiated channel.close methods
             completionHandler(result.frameset);

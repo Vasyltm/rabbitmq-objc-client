@@ -59,7 +59,7 @@
 @property (nonatomic, readwrite) NSNumber *prefetchCountPerConsumer;
 @property (nonatomic, readwrite) NSNumber *prefetchCountPerChannel;
 @property (nonatomic, readwrite) id<RMQConnectionDelegate> delegate;
-@property (nonatomic, readwrite) id<RMQNameGenerator> nameGenerator;
+@property (nonatomic, weak, readwrite) id<RMQNameGenerator> nameGenerator;
 @property (nonatomic, weak, readwrite) id<RMQChannelAllocator> allocator;
 @end
 
@@ -130,9 +130,12 @@
 }
 
 - (void)close {
+    __weak id this = self;
+
     [self.dispatcher sendSyncMethod:[RMQChannelClose new]
                      completionHandler:^(RMQFrameset *frameset) {
-                         [self.allocator releaseChannelNumber:self.channelNumber];
+        __strong typeof(self) strongThis = this;
+                         [strongThis.allocator releaseChannelNumber:weakSelf.channelNumber];
                      }];
 }
 
@@ -306,11 +309,13 @@
 }
 
 - (void)basicCancel:(NSString *)consumerTag {
+    __weak id this = self;
     [self.dispatcher sendSyncMethod:[[RMQBasicCancel alloc] initWithConsumerTag:[[RMQShortstr alloc] init:consumerTag]
                                                                         options:RMQBasicCancelNoOptions]
                   completionHandler:^(RMQFrameset *frameset) {
-                      [self.consumers removeObjectForKey:consumerTag];
-                  }];
+        __strong typeof(self) strongThis = this;
+        [strongThis.consumers removeObjectForKey:consumerTag];
+    }];
 }
 
 - (NSNumber *)basicPublish:(NSData *)body
