@@ -130,12 +130,9 @@
 }
 
 - (void)close {
-    __weak id this = self;
-
     [self.dispatcher sendSyncMethod:[RMQChannelClose new]
                      completionHandler:^(RMQFrameset *frameset) {
-        __strong typeof(self) strongThis = this;
-                         [strongThis.allocator releaseChannelNumber:weakSelf.channelNumber];
+                         [self.allocator releaseChannelNumber:self.channelNumber];
                      }];
 }
 
@@ -280,12 +277,14 @@
 }
 
 - (void)basicConsume:(RMQConsumer *)consumer {
+    __weak id this = self;
     [self.dispatcher sendSyncMethod:[[RMQBasicConsume alloc] initWithQueue:consumer.queueName
                                                                consumerTag:consumer.tag
                                                                    options:consumer.options
                                                                  arguments:consumer.arguments]
                   completionHandler:^(RMQFrameset *frameset) {
-                      self.consumers[consumer.tag] = consumer;
+        __strong typeof(self) strongThis = this;
+        strongThis.consumers[consumer.tag] = consumer;
                   }];
 }
 

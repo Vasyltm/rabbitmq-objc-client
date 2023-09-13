@@ -48,7 +48,7 @@
 @property (nonatomic, readwrite) NSString *queueName;
 @property (nonatomic, readwrite) RMQBasicConsumeOptions options;
 @property (nonatomic, readwrite) NSString *tag;
-@property (nonatomic, readwrite) id<RMQChannel> channel;
+@property (nonatomic, weak, readwrite) id<RMQChannel> channel;
 @property (nonatomic, readwrite) RMQConsumerDeliveryHandler deliveryHandler;
 @property (nonatomic, readwrite) RMQConsumerCancellationHandler cancellationHandler;
 @property (nonatomic, readwrite) RMQTable *arguments;

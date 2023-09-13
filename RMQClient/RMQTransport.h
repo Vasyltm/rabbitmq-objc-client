@@ -44,7 +44,7 @@
 #import "RMQTransportDelegate.h"
 
 @protocol RMQTransport
-@property (nullable, nonatomic, readwrite) id<RMQTransportDelegate> delegate;
+@property (nullable, weak, nonatomic, readwrite) id<RMQTransportDelegate> delegate;
 - (BOOL)connectAndReturnError:(NSError * _Nullable * _Nullable)error;
 - (void)close;
 - (void)write:(nonnull NSData *)data;

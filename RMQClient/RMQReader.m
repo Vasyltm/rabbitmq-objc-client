@@ -46,7 +46,7 @@
 
 @interface RMQReader ()
 @property (nonatomic,weak, readwrite) id<RMQTransport>transport;
-@property (nonatomic, readwrite) id<RMQFrameHandler>frameHandler;
+@property (nonatomic, weak, readwrite) id<RMQFrameHandler>frameHandler;
 @end
 
 @implementation RMQReader
