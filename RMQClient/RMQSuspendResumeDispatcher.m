@@ -89,16 +89,19 @@
 }
 
 - (void)blockingWaitOn:(Class)method {
+    __weak id this = self;
     [self.commandQueue blockingEnqueue:^{
-        [self processOutgoing:nil executeOrErr:^{
-            [self.commandQueue suspend];
+        __strong typeof(self) strongThis = this;
+        [strongThis processOutgoing:nil executeOrErr:^{
+            [strongThis.commandQueue suspend];
         }];
     }];
 
     [self.commandQueue blockingEnqueue:^{
-        RMQFramesetValidationResult *result = [self.validator expect:method];
+        __strong typeof(self) strongThis = this;
+        RMQFramesetValidationResult *result = [strongThis.validator expect:method];
         if (result.error) {
-            [self.delegate channel:self.channel error:result.error];
+            [strongThis.delegate channel:strongThis.channel error:result.error];
         }
     }];
 }
@@ -139,31 +142,36 @@
 }
 
 - (void)sendSyncMethodBlocking:(id<RMQMethod>)method {
+    __weak id this = self;
     [self.commandQueue blockingEnqueue:^{
-        [self processOutgoing:method executeOrErr:^{
-            if ([self isChannelClose:method]) {
-                [self processUserInitiatedChannelClose];
+        __strong typeof(self) strongThis = this;
+        [strongThis processOutgoing:method executeOrErr:^{
+            if ([strongThis isChannelClose:method]) {
+                [strongThis processUserInitiatedChannelClose];
             }
 
-            RMQFrameset *frameset = [[RMQFrameset alloc] initWithChannelNumber:self.channelNumber method:method];
-            [self.commandQueue suspend];
-            [self.sender sendFrameset:frameset];
+            RMQFrameset *frameset = [[RMQFrameset alloc] initWithChannelNumber:strongThis.channelNumber method:method];
+            [strongThis.commandQueue suspend];
+            [strongThis.sender sendFrameset:frameset];
         }];
     }];
 
     [self.commandQueue blockingEnqueue:^{
-        RMQFramesetValidationResult *result = [self.validator expect:method.syncResponse];
+        __strong typeof(self) strongThis = this;
+        RMQFramesetValidationResult *result = [strongThis.validator expect:method.syncResponse];
 
-        if (self.isOpen && result.error) {
-            [self.delegate channel:self.channel error:result.error];
+        if (strongThis.isOpen && result.error) {
+            [strongThis.delegate channel:strongThis.channel error:result.error];
         }
     }];
 }
 
 - (void)sendAsyncFrameset:(RMQFrameset *)frameset {
+    __weak id this = self;
     [self.commandQueue enqueue:^{
-        [self processOutgoing:frameset.method executeOrErr:^{
-            [self.sender sendFrameset:frameset];
+        __strong typeof(self) strongThis = this;
+        [strongThis processOutgoing:frameset.method executeOrErr:^{
+            [strongThis.sender sendFrameset:frameset];
         }];
     }];
 }
@@ -182,9 +190,11 @@
 }
 
 - (void)enable {
+    __weak id this = self;
     [self.enablementQueue delayedBy:self.enableDelay enqueue:^{
-        self.disabled = NO;
-        [self.commandQueue resume];
+        __strong typeof(self) strongThis = this;
+        strongThis.disabled = NO;
+        [strongThis.commandQueue resume];
     }];
 }
 

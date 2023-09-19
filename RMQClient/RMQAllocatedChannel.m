@@ -488,21 +488,26 @@ completionHandler:(RMQConsumerDeliveryHandler)userCompletionHandler {
 # pragma mark - RMQFrameHandler
 
 - (void)handleFrameset:(RMQFrameset *)frameset {
+    __weak id this = self;
     if ([frameset.method isKindOfClass:[RMQBasicDeliver class]]) {
         [self.dispatcher enqueue:^{
-            [self handleBasicDeliver:frameset];
+            __strong typeof(self) strongThis = this;
+            [strongThis handleBasicDeliver:frameset];
         }];
     } else if ([frameset.method isKindOfClass:[RMQBasicCancel class]]) {
         [self.dispatcher enqueue:^{
-            [self handleBasicCancel:frameset];
+            __strong typeof(self) strongThis = this;
+            [strongThis handleBasicCancel:frameset];
         }];
     } else if ([frameset.method isKindOfClass:[RMQBasicAck class]]) {
         [self.dispatcher enqueue:^{
-            [self.confirmations ack:(RMQBasicAck *)frameset.method];
+            __strong typeof(self) strongThis = this;
+            [strongThis.confirmations ack:(RMQBasicAck *)frameset.method];
         }];
     } else if ([frameset.method isKindOfClass:[RMQBasicNack class]]) {
         [self.dispatcher enqueue:^{
-            [self.confirmations nack:(RMQBasicNack *)frameset.method];
+            __strong typeof(self) strongThis = this;
+            [strongThis.confirmations nack:(RMQBasicNack *)frameset.method];
         }];
     } else {
         [self.dispatcher handleFrameset:frameset];

@@ -599,8 +599,10 @@ static void RMQInitConnectionConfigDefaults() {
     id<RMQChannel> ch = self.channelAllocator.allocate;
     self.userChannels[ch.channelNumber] = ch;
 
+    __weak id this = self;
     [self.commandQueue enqueue:^{
-        [ch activateWithDelegate:self.delegate];
+        __strong typeof(self) strongThis = this;
+        [ch activateWithDelegate:strongThis.delegate];
     }];
 
     [ch open];

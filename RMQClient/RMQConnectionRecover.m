@@ -76,8 +76,13 @@
 -  (void)recover:(id<RMQStarter>)connection
 channelAllocator:(id<RMQChannelAllocator>)allocator
            error:(NSError *)error {
+    __weak id this = self;
+    __weak typeof(connection) weakConnection = connection;
+    __weak typeof(allocator) weakAllocator = allocator;
+
     [self.commandQueue enqueue:^{
-        [self.heartbeatSender stop];
+        __strong typeof(self) strongThis = this;
+        [strongThis.heartbeatSender stop];
     }];
 
     if ((self.onlyErrors && !error) || [self currentAttemptBeyondLimit]) {
@@ -85,18 +90,23 @@ channelAllocator:(id<RMQChannelAllocator>)allocator
     }
 
     [self.commandQueue enqueue:^{
-        [self.delegate willStartRecoveryWithConnection:(RMQConnection *)connection];
+        __strong typeof(self) strongThis = this;
+        __strong typeof(weakConnection) strongConnection = weakConnection;
+        [strongThis.delegate willStartRecoveryWithConnection:(RMQConnection *)strongConnection];
     }];
 
     [self.commandQueue delayedBy:self.interval enqueue:^{
-        [self.delegate startingRecoveryWithConnection:(RMQConnection *)connection];
-        [connection start:^{
-            [self.commandQueue enqueue:^{
-                for (id<RMQChannel> ch in allocator.allocatedUserChannels) {
+        __strong typeof(self) strongThis = this;
+        __strong typeof(weakConnection) strongConnection = weakConnection;
+        __strong typeof(weakAllocator) strongAllocator = weakAllocator;
+        [strongThis.delegate startingRecoveryWithConnection:(RMQConnection *)strongConnection];
+        [strongConnection start:^{
+            [strongThis.commandQueue enqueue:^{
+                for (id<RMQChannel> ch in strongAllocator.allocatedUserChannels) {
                     [ch recover];
                 }
-                self.attempts = 0;
-                [self.delegate recoveredConnection:(RMQConnection *)connection];
+                strongThis.attempts = 0;
+                [strongThis.delegate recoveredConnection:(RMQConnection *)strongConnection];
             }];
         }];
     }];

@@ -43,7 +43,7 @@
 #import "RMQHandshaker.h"
 
 @interface RMQHandshaker ()
-@property (nonatomic, readwrite) id<RMQSender> sender;
+@property (nonatomic, weak, readwrite) id<RMQSender> sender;
 @property (nonatomic, readwrite) RMQConnectionConfig *config;
 @property (nonatomic, readwrite) void (^completionHandler)(NSNumber *heartbeatTimeout,
                                                            RMQTable *serverProperties);

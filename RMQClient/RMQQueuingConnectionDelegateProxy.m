@@ -60,38 +60,50 @@
 }
 
 - (void)connection:(RMQConnection *)connection disconnectedWithError:(NSError *)error {
+    __weak id this = self;
     dispatch_async(self.queue, ^{
-        [self.delegate connection:connection disconnectedWithError:error];
+        __strong typeof(self) strongThis = this;
+        [strongThis.delegate connection:connection disconnectedWithError:error];
     });
 }
 
 - (void)connection:(RMQConnection *)connection failedToConnectWithError:(NSError *)error {
+    __weak id this = self;
     dispatch_async(self.queue, ^{
-        [self.delegate connection:connection failedToConnectWithError:error];
+        __strong typeof(self) strongThis = this;
+        [strongThis.delegate connection:connection failedToConnectWithError:error];
     });
 }
 
 - (void)channel:(id<RMQChannel>)channel error:(NSError *)error {
+    __weak id this = self;
     dispatch_async(self.queue, ^{
-        [self.delegate channel:channel error:error];
+        __strong typeof(self) strongThis = this;
+        [strongThis.delegate channel:channel error:error];
     });
 }
 
 - (void)willStartRecoveryWithConnection:(RMQConnection *)connection {
+    __weak id this = self;
     dispatch_async(self.queue, ^{
-        [self.delegate willStartRecoveryWithConnection:connection];
+        __strong typeof(self) strongThis = this;
+        [strongThis.delegate willStartRecoveryWithConnection:connection];
     });
 }
 
 - (void)startingRecoveryWithConnection:(RMQConnection *)connection {
+    __weak id this = self;
     dispatch_async(self.queue, ^{
-        [self.delegate startingRecoveryWithConnection:connection];
+        __strong typeof(self) strongThis = this;
+        [strongThis.delegate startingRecoveryWithConnection:connection];
     });
 }
 
 - (void)recoveredConnection:(RMQConnection *)connection {
+    __weak id this = self;
     dispatch_async(self.queue, ^{
-        [self.delegate recoveredConnection:connection];
+        __strong typeof(self) strongThis = this;
+        [strongThis.delegate recoveredConnection:connection];
     });
 }
 

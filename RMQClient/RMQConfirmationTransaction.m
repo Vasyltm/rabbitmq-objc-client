@@ -66,11 +66,13 @@
 - (void)setCallback:(RMQConfirmationCallback)callback
             timeout:(NSNumber *)timeoutInSecs {
     self.callback = callback;
+    __weak id this = self;
     [self.delayQueue delayedBy:timeoutInSecs enqueue:^{
-        for (NSNumber *tag in self.unconfirmed) {
-            [self.confirmedNacks addObject:tag];
+        __strong typeof(self) strongThis = this;
+        for (NSNumber *tag in strongThis.unconfirmed) {
+            [strongThis.confirmedNacks addObject:tag];
         }
-        [self complete];
+        [strongThis complete];
     }];
 }
 

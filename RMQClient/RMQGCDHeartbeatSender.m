@@ -73,8 +73,10 @@
 - (void (^)(void))startWithInterval:(NSNumber *)intervalSeconds {
     self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, self.dispatchQueue);
     
+    __weak id this = self;
     void (^eventHandler)(void) = ^{
-        if ([self intervalPassed:intervalSeconds]) [self.transport write:self.heartbeatData];
+        __strong typeof(self) strongThis = this;
+        if ([strongThis intervalPassed:intervalSeconds]) [strongThis.transport write:strongThis.heartbeatData];
     };
     double leewaySeconds = 1;
     dispatch_source_set_timer(self.timer,
